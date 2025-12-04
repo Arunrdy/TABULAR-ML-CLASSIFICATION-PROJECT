@@ -15,8 +15,7 @@ Upload CSV/Excel or pre-saved NumPy arrays, preprocess, train ML models, evaluat
 ---
 
 ## 🔗 Repository
-**GitHub:** `https://github.com/Arunrdy/TABULAR-ML-CLASSIFICATION-PROJECT`
-
+👉 **GitHub:** https://github.com/Arunrdy/TABULAR-ML-CLASSIFICATION-PROJECT
 ---
 
 ## ⚙️ Install & Run (short)
@@ -32,7 +31,7 @@ python app.py
 ```
 
 Open in browser:  
-`http://localhost:5000/`
+👉 **http://127.0.0.1:5000/**  
 
 ---
 
