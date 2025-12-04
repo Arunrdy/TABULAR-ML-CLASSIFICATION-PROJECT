@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Health Prediction Form</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef2f7;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .form-container {
+            position: relative;
+            width: 420px;
+            margin: 0 auto;
+            padding: 26px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 14px 0;
+            color: #222;
+        }
+
+        .input-box {
+            margin-bottom: 12px;
+        }
+        .input-box label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+        .input-box input {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #cfcfcf;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 11px;
+            background: #0066ff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover { background: #0052cc; }
+
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            padding: 6px 10px;
+            background: #ff5b5b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .clear-btn:hover { background: #e04444; }
+
+        .result-box {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f6f8fa;
+            color: #222;
+            font-weight: 600;
+            text-align: center;
+            min-height: 28px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+
+    <button type="button" class="clear-btn" onclick="clearForm()">Clear</button>
+
+    <h2>Health Prediction Form</h2>
+
+    <form action="/predict" method="POST" id="predict-form">
+
+        <div class="input-box">
+            <label for="age">Age</label>
+            <input id="age" name="age" type="number"
+                   value="{{ request.form.age or '' }}" required>
+        </div>
+
+        <div class="input-box">
+            <label for="bp">Blood Pressure (BP)</label>
+            <input id="bp" name="bp" type="number"
+                   value="{{ request.form.bp or '' }}" required>
+        </div>
+
+        <div class="input-box">
+            <label for="cholesterol">Cholesterol</label>
+            <input id="cholesterol" name="cholesterol" type="number"
+                   value="{{ request.form.cholesterol or '' }}" required>
+        </div>
+
+        <div class="input-box">
+            <label for="glucose">Glucose</label>
+            <input id="glucose" name="glucose" type="number"
+                   value="{{ request.form.glucose or '' }}" required>
+        </div>
+
+        <div class="input-box">
+            <label for="heart_rate">Heart Rate</label>
+            <input id="heart_rate" name="heart_rate" type="number"
+                   value="{{ request.form.heart_rate or '' }}" required>
+        </div>
+
+        <button type="submit" class="btn">Predict</button>
+
+    </form>
+
+    <div class="result-box" id="result-box">
+        {% if result %}
+            <div><strong>Prediction:</strong> {{ result }}</div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    function clearForm() {
+        document.querySelectorAll("#predict-form input").forEach(function(inp) {
+            inp.value = '';
+        });
+        document.getElementById("result-box").innerHTML = '';
+    }
+</script>
+
+</body>
+</html>
