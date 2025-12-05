@@ -9,6 +9,5 @@ joblib
 gunicorn
 jupyter
 flask
-fastapi
-uvicorn
 python-multipart
+
