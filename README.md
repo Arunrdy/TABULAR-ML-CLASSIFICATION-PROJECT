@@ -31,8 +31,8 @@ python app.py
 ```
 
 Open in browser:  
-👉 https://tabular-ml-classification-project-xdo0.onrender.com
----
+👉 https://tabular-ml-classification-project-xdo0.onrender.com/predict
+
 
 ## 🎯 How to use (summary)
 1. Open the web UI.  
