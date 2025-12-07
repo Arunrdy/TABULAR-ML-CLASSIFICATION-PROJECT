@@ -13,7 +13,7 @@ SCALER_PATH = "models/scaler_5_features.pkl"  # Make sure you save the scaler du
 if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH):
     raise FileNotFoundError("Please run train.py first to generate model and scaler.")
 
-model = joblib.load(MODEL_PATH)[0]
+model = joblib.load(MODEL_PATH)
 scaler = joblib.load(SCALER_PATH)
 
 # Path to dataset
