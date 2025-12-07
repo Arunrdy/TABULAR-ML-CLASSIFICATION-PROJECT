@@ -46,6 +46,6 @@ print(classification_report(y_test, y_pred))
 joblib.dump(scaler, SCALER_PATH)
 print(f"Scaler saved at: {SCALER_PATH}")
 
-# Save model
-joblib.dump([model], MODEL_PATH)
+# Save model ✅ directly, not inside a list
+joblib.dump(model, MODEL_PATH)
 print(f"Model saved at: {MODEL_PATH}")
