@@ -1,13 +1,10 @@
 import joblib
 
-loaded = joblib.load("models/xgb_improved.pkl")
+MODEL_PATH = "models/xgb_5_features.pkl"
+SCALER_PATH = "models/scaler_5_features.pkl"
 
-print("Type:", type(loaded))
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
 
-if isinstance(loaded, tuple):
-    print("Tuple length:", len(loaded))
-    print("Contents:")
-    for i, item in enumerate(loaded):
-        print(f"Index {i}: {type(item)}")
-else:
-    print("Object is not a tuple. It is:", type(loaded))
+print("Model loaded:", type(model))
+print("Scaler loaded:", type(scaler))
