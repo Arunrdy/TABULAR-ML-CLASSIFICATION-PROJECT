@@ -6,8 +6,7 @@ matplotlib
 seaborn
 shap
 joblib
-gunicorn
-jupyter
 flask
+gunicorn
 python-multipart
 
