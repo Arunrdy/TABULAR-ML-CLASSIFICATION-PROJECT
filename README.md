@@ -31,8 +31,7 @@ python app.py
 ```
 
 Open in browser:  
-👉 **http://127.0.0.1:5000/**  
-
+👉 https://tabular-ml-classification-project-xdo0.onrender.com
 ---
 
 ## 🎯 How to use (summary)
