@@ -30,7 +30,7 @@ python app.py
 ```
 
 Open in browser:  
-👉 https://tabular-ml-classification-project-xdo0.onrender.com
+👉  https://tabular-ml-classification-project-xdo0.onrender.com
 
 
 ## 🎯 How to use (summary)
