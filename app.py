@@ -1,125 +1,68 @@
-# app.py (replace entire file in GitHub with this)
 from flask import Flask, render_template, request
 import numpy as np
 import joblib
 import csv
 import os
-import sys
-import traceback
+from sklearn.preprocessing import MinMaxScaler
 
 app = Flask(__name__)
 
-# Paths (adjust if your repo uses different filenames)
+# Load trained 5-feature model
 MODEL_PATH = "models/xgb_5_features.pkl"
-SCALER_PATH = "models/scaler_5_features.pkl"
-DATA_FILE = "data/dataset.csv"
-
-# Ensure folders exist
-os.makedirs("models", exist_ok=True)
-os.makedirs("data", exist_ok=True)
-
-def safe_print(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
-
-# Load model + scaler with defensive checks & debug info
+SCALER_PATH = "models/scaler_5_features.pkl"  # Make sure you save the scaler during training
 if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH):
-    safe_print("DEBUG: One or both model files are missing.")
-    safe_print("DEBUG: models folder content:", os.listdir("models") if os.path.exists("models") else "models folder not found")
-    # We will NOT raise here: keep server alive to show debug on Render
-else:
-    safe_print("DEBUG: Found model files. Listing models folder:", os.listdir("models"))
+    raise FileNotFoundError("Please run train.py first to generate model and scaler.")
 
-# Try to load model and scaler; catch problems and log
-model = None
-scaler = None
-try:
-    if os.path.exists(MODEL_PATH):
-        raw = joblib.load(MODEL_PATH)
-        safe_print("DEBUG: raw model object type:", type(raw))
-        # If someone saved [model] or [model, scaler], handle that automatically:
-        if isinstance(raw, list):
-            # try to find first object that looks like an estimator
-            if len(raw) == 0:
-                raise ValueError("Loaded list is empty.")
-            # naive: assume first item is model
-            model = raw[0]
-            safe_print("DEBUG: Raw model was a list. Using element [0] as model:", type(model))
-        else:
-            model = raw
-            safe_print("DEBUG: Model loaded as:", type(model))
-    else:
-        safe_print(f"DEBUG: Model file not found at {MODEL_PATH}")
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
+print("MODEL TYPE:", type(model))
+import sys
+sys.stdout.flush()
 
-    if os.path.exists(SCALER_PATH):
-        scaler = joblib.load(SCALER_PATH)
-        safe_print("DEBUG: Scaler loaded as:", type(scaler))
-    else:
-        safe_print(f"DEBUG: Scaler file not found at {SCALER_PATH}")
-
-except Exception as e:
-    safe_print("DEBUG: Exception while loading model/scaler:")
-    safe_print(traceback.format_exc())
+# Path to dataset
+DATA_FILE = "data/dataset.csv"
 
 @app.route("/")
 def home():
-    # If you have a template (form.html or index.html), Flask will render it.
-    # If not, this returns a simple HTML form fallback.
-    tpl = "form.html" if os.path.exists(os.path.join("templates", "form.html")) else None
-    if tpl:
-        return render_template(tpl, result=None)
-    else:
-        return """
-        <html><body>
-        <h2>Model Server</h2>
-        <form action="/predict" method="post">
-          Age: <input name="age" value="50"><br>
-          BP: <input name="bp" value="120"><br>
-          Chol: <input name="cholesterol" value="200"><br>
-          Glucose: <input name="glucose" value="100"><br>
-          Heart rate: <input name="heart_rate" value="80"><br>
-          <button type="submit">Predict</button>
-        </form>
-        <p>Check logs for debug info.</p>
-        </body></html>
-        """
+    return render_template("form.html", result=None)
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # check model is present
-        if model is None:
-            return "ERROR: model not loaded. Check logs.", 500
-        if scaler is None:
-            return "ERROR: scaler not loaded. Check logs.", 500
+        # Read form values
+        age = float(request.form["age"])
+        bp = float(request.form["bp"])
+        cholesterol = float(request.form["cholesterol"])
+        glucose = float(request.form["glucose"])
+        heart_rate = float(request.form["heart_rate"])
 
-        age = float(request.form.get("age", 0))
-        bp = float(request.form.get("bp", 0))
-        cholesterol = float(request.form.get("cholesterol", 0))
-        glucose = float(request.form.get("glucose", 0))
-        heart_rate = float(request.form.get("heart_rate", 0))
+        # Convert input to array
+        input_data = np.array([[age, bp, cholesterol, glucose, heart_rate]])
 
-        features = np.array([[age, bp, cholesterol, glucose, heart_rate]])
-        features_scaled = scaler.transform(features)
-        pred = model.predict(features_scaled)[0]
-        result = "SICK" if int(pred) == 1 else "HEALTHY"
+        # Scale input using the same scaler as training
+        input_scaled = scaler.transform(input_data)
 
-        # append to CSV dataset (create header if missing)
-        file_exists = os.path.exists(DATA_FILE)
+        # Make prediction
+        pred = model.predict(input_scaled)[0]
+        result = "SICK" if pred == 1 else "HEALTHY"
+
+        # Append new data to dataset.csv
+        if not os.path.exists(DATA_FILE):
+            # If dataset doesn't exist, create with header
+            with open(DATA_FILE, "w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["age", "bp", "cholesterol", "glucose", "heart_rate", "target"])
+
         with open(DATA_FILE, "a", newline="") as f:
             writer = csv.writer(f)
-            if not file_exists:
-                writer.writerow(["age", "bp", "cholesterol", "glucose", "heart_rate", "target"])
-            writer.writerow([age, bp, cholesterol, glucose, heart_rate, int(pred)])
+            writer.writerow([age, bp, cholesterol, glucose, heart_rate, pred])
 
-        return render_template("form.html", result=result) if os.path.exists(os.path.join("templates", "form.html")) else result
+        return render_template("form.html", result=result)
 
     except Exception as e:
-        safe_print("DEBUG: Exception in /predict:")
-        safe_print(traceback.format_exc())
-        return f"Error: {str(e)}", 500
+        return render_template("form.html", result=f"Error: {e}")
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    safe_print("Starting app on port", port)
-    app.run(host="0.0.0.0", port=port, debug=False)
+    import os
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=False)
+
